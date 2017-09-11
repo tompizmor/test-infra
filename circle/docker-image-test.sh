@@ -28,21 +28,13 @@ docker_load_cache
 if [[ -n $RELEASE_SERIES_LIST ]]; then
   IFS=',' read -ra RELEASE_SERIES_ARRAY <<< "$RELEASE_SERIES_LIST"
   for RS in "${RELEASE_SERIES_ARRAY[@]}"; do
-    if [[ -n $IMAGE_TAG ]]; then
-      if [[ "$IMAGE_TAG" == "$RS"* ]]; then
-        for BI in "${SUPPORTED_BASE_IMAGES_ARRAY[@]}"; do
-          IMAGE_BUILD_DIR=`get_image_build_dir $RS $BI`
-          IMAGE_BUILD_TAG=`get_image_build_tag $RS $BI`
-          docker_build $DOCKER_PROJECT/$IMAGE_NAME:$IMAGE_BUILD_TAG $IMAGE_BUILD_DIR || exit 1
-        done
-      fi
-    else
-      for BI in "${SUPPORTED_BASE_IMAGES_ARRAY[@]}"; do
-        IMAGE_BUILD_DIR=`get_image_build_dir $RS $BI`
-        IMAGE_BUILD_TAG=`get_image_build_tag $RS $BI`
-        docker_build $DOCKER_PROJECT/$IMAGE_NAME:$IMAGE_BUILD_TAG $IMAGE_BUILD_DIR || exit 1
-      done
-    fi
+    # on release, only build the release branch, else build all branches in RELEASE_SERIES_LIST
+    [[ -n $IMAGE_TAG && "$IMAGE_TAG" != "$RS"* ]] && continue
+    for BI in "${SUPPORTED_BASE_IMAGES_ARRAY[@]}"; do
+      IMAGE_BUILD_DIR=`get_image_build_dir $RS $BI`
+      IMAGE_BUILD_TAG=`get_image_build_tag $RS $BI`
+      docker_build $DOCKER_PROJECT/$IMAGE_NAME:$IMAGE_BUILD_TAG $IMAGE_BUILD_DIR || exit 1
+    done
   done
 else
   docker_build $DOCKER_PROJECT/$IMAGE_NAME . || exit 1
