@@ -436,6 +436,8 @@ get_image_build_dir() {
         IMAGE_BUILD_DIR=$RELEASE_BRANCH/$BASE_IMAGE
     elif [[ -f $RELEASE_BRANCH/$DOCKERFILE ]]; then
         IMAGE_BUILD_DIR=$RELEASE_BRANCH
+    elif [[ -f $DOCKERFILE ]]; then
+        IMAGE_BUILD_DIR=.
     else
         error "Dockerfile not found. Check the Dockerfile is present either in the release_series folder or the base_image folder"
 	exit 1
